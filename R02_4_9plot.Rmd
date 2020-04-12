@@ -1,0 +1,33 @@
+---
+title: "R01_4_11_plot"
+author: "黃珈綺"
+date: "2020/4/11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+summary(cars)
+```
+
+```{r}
+par(mfrow = c(3, 1))
+hist(mtcars$mpg)
+hist(mtcars$cyl)
+hist(mtcars$hp)
+```
+```{r}
+plot(mtcars$mpg, mtcars$hp)
+```
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
