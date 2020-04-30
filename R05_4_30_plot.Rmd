@@ -1,0 +1,83 @@
+---
+title: "Untitled"
+author: "黃珈綺"
+date: "2020/4/30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("pacman")
+library(pacman)
+install.packages("nycflights13")
+library(nycflights13)
+p_load(nycflights13, tidyverse)
+```
+
+Q1. 請利用filter找出1月1號所有航班資料。
+```{r}
+filter(flights,month==1,day==1)
+```
+
+Q2. 利用filter找出抵達誤點超過二個小時以上所有航班資料，並將arr_delay顯示在第四欄。(提示：arr_delay >= 120,  select(year:day, arr_delay, everything()))
+```{r}
+filter(flights,arr_delay>=120,month==1,day==1)
+select(flights,year:day, arr_delay, everything())
+```
+
+Q3. 利用arrange, slice將抵達誤點時間, 以遞減的順序進行排列，並找出誤點最久的班機資訊(carrier, flight)。(提示：desc())
+```{r}
+arrange(flights,desc(arr_delay))%>% slice(1:1)
+```
+Q4. 那家航空公司誤點(arr_delay)最嚴重?平均時間為多少? (提示：group_by, summarise, arrange, 計算平均數時，na.rm 要設定為TRUE)
+```{r}
+flights %>% group_by(carrier) %>% 
+            summarise_at(vars(arr_delay), funs(mean), na.rm = TRUE) %>% 
+            arrange(desc(arr_delay)) %>% rename(arr_delay = arr_delay)
+```
+
+Q5. 如果你想要盡可能避開誤點，應該搭乘一天中那個時間的航班?(group_by(hour), summarise, arrange)
+```{r}
+flights %>% group_by(hour) %>% 
+            summarise_at(vars(arr_delay), funs(mean), na.rm = TRUE) %>% 
+            arrange(desc(arr_delay)) %>% rename(arr_delay = arr_delay)
+```
+
+Q6. 請從flights中「依序」選出year:day, hour, origin, dest,  tailnum, carrier等欄位，再抽出前100筆記資料，最後和airlines做left_join；換言之，就是把airlines
+```{r}
+flights %>% select(year:day,hour, origin, dest, tailnum, carrier)
+answer06 <- local({
+  slice(flights, 1:100) %>%
+    select(year:day, hour, origin, dest, tailnum, carrier) %>%
+    left_join(y = airlines, by = "carrier")
+})
+head(answer06)
+```
+Q7. 利用left_join將answer06與weather結合，再與airports結合。(提示：left_join(..., by = c("dest" = "faa")))
+```{r}
+ left_join(left_join(answer06,weather,by =NULL,copy=FALSE,suffix= c("dest","faa")),airports,by =NULL,copy=FALSE,suffix= c("dest","faa"))
+```
+Q8. 請計算每個月抵達ALB, BDL, BTV三個機場的班機總次數。(n()可以計算次數)
+```{r}
+by_dest=group_by(flights,year,month,dest)
+summarise(by_dest,count = n())
+```
+
+Q9. 請依始發地、航空公司、及月份(origin, carrier, month) 計算平均起飛延誤(dep_delay)的時間。
+
+```{r}
+flights %>%
+  group_by(carrier,month,origin) %>%
+  summarise(dep_delay=mean(dep_delay,na.rm = TRUE)) %>%
+  arrange(desc(dep_delay))
+```
+
+Q10. 請將weather中temp以直方圖畫出分配 (hist())。
+
+```{r}
+hist(main="2013 New York Airport Temperature",
+     xlab="temperature",weather$temp)
+```
