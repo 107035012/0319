@@ -1,0 +1,44 @@
+---
+title: "Untitled"
+author: "黃珈綺"
+date: "2020/5/10"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r}
+data(mpg)
+```
+
+
+Q1. 請畫出排氣量(displ)與高速公路每加崙英哩(hwy)的關係，以及用顏色區分車種(class)。
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+
+```
+
+Q2. 根據Q1, 再加上線性趨勢。
+```{r}
+ggplot(data = mpg, aes(x = displ, y =hwy)) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))+
+   stat_smooth(method = 'lm')
+```
+
+Q3: 嘗試畫出下列圖形。
+```{r}
+ggplot(data = mpg) +
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
+  geom_smooth(
+    mapping = aes(x = displ, y = hwy, linetype = drv),
+    show.legend = FALSE)
+```
