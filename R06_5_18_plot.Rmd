@@ -1,0 +1,76 @@
+---
+title: "Untitled"
+author: "黃珈綺"
+date: "2020/5/17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+m.price <- read.table("2019_daily_closing1.txt")
+m.price <- m.price[-1,]
+colnames(m.price) <- c("id","name","date","close")
+head(m.price)
+```
+
+
+
+```{r}
+library(reshape2)
+mprice.reorder <- dcast(m.price, date~id)
+head(mprice.reorder)
+```
+
+```{r}
+library(pacman)
+p_load(lubridate)
+
+ymd_hms('2011-06-04 11:01:01')
+myDate <- ymd_hms('2011 june 4th,11:01:01')
+myDate
+
+year(myDate)
+month(myDate)
+
+yday(myDate)
+mday(myDate)
+wday(myDate, label = TRUE)
+as.POSIXlt('2014-05-01', format = "%Y-%m-%d")
+library(xts)
+dates17 <- date(c("2019-01-02","2019-01-03","2019-01-04",
+             "2019-01-07","2019-01-08","2019-01-09"))
+a1101 <- c(31.1099,30.7210,31.4124,
+          30.6778,30.3754,30.6346)
+a1102 <- c(32.7650,32.5769,33.1410,
+          31.7778,31.8718,31.8248)
+datadf <- data.frame(a1101, a1102)
+xts(datadf, dates17)
+```
+
+```{r}
+p_load(tbl2xts)
+library(dplyr)
+options(digits=3)
+tibble(
+  s=c("2019-01-02","2019-01-03","2019-01-04",
+             "2019-01-07","2019-01-08","2019-01-09"),
+  x1101 = a1101, 
+  x1102 = a1102)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

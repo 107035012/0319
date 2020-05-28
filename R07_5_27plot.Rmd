@@ -1,0 +1,86 @@
+---
+title: "Untitled"
+author: "黃珈綺"
+date: "2020/5/28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(pacman)
+p_load(tidyverse, lubridate, readxl, highcharter, tidyquant, 
+       timetk, tibbletime, quantmod, PerformanceAnalytics, scales)
+p_load(reshape2)
+
+```
+
+Q1. 請到TEJ資料庫下載0050, 0052, 0061, 006206, 00638R, 00646日收盤價(除權息調整後)，時間為20080101-20200430。將資料讀入後，將資料轉為寬資料，並刪除不完整的資料列，留下完整的資料。
+
+```{r}
+p_load(tidyverse, lubridate, readxl, highcharter, tidyquant,
+       timetk, tibbletime, quantmod, PerformanceAnalytics, scales)
+etf6 <-read.csv("etf_portfolio.csv", header = TRUE)
+etf6<- etf6 %>% select(-2)
+colnames(etf6) <-c('id','date','close')
+head(etf6)
+etf6.1 <- dcast(etf6, date~id)
+head(etf6.1[, 1:6])
+apply(is.na(etf6.1), 2, sum)
+na.omit(etf6.1)
+```
+
+Q2. 轉換為xts資料型態。
+```{r}
+etf6.xts <- xts(etf6.1[, -1], order.by = as.Date(as.character(etf6.1$date),format = "%Y%m%d"))
+na.omit(etf6.xts)
+```
+
+Q3. 計算日報酬率、週報酬率、月報酬率。
+```{r}
+etf6.ret <- Return.calculate(etf6.xts, method = 'log') %>% na.omit()
+head(etf6.ret)
+
+etf6.w <- etf6.xts %>% to.weekly(indexAt = 'lastof', OHLC = FALSE)
+head(etf6.w)
+etf6.m <- etf6.xts %>% to.monthly(indexAt = 'lastof', OHLC = FALSE)
+head(etf6.m)
+```
+
+Q4. 針對六種資產日報酬率，計算統計量。(提示：library(fBasics), basicStats())
+```{r}
+summary(etf6.ret)
+p_load(fBasics)
+basicStats(etf6.ret)
+etf6.ret.xts <- etf6.ret %>% tk_xts(silent = TRUE)
+```
+
+
+
+
+Q5. 將xts轉為tbl資料，並利用ggplot畫出月報酬率的直方圖及密度分配圖
+```{r}
+etf6.m1 <- etf6.xts %>%
+               tk_tbl(preserve_index =TRUE, rename_index ="date") %>%
+               gather(asset, returns, -date) %>%
+               group_by(asset) %>%
+               tq_transmute(mutate_fun =periodReturn,
+                           type ="log") %>%
+               spread(asset, monthly.returns)
+etf6.m1 %>% gather(asset, returns, -date) %>% 
+                ggplot(aes(x = returns)) +
+                geom_density(aes(color = asset), alpha = 1) +
+                geom_histogram(aes(fill = asset), alpha = 0.45, binwidth = .01) +
+                guides(fill = FALSE) +
+                facet_wrap(~asset) +
+                ggtitle("Monthly Returns Since 2013") +
+                xlab("monthly returns") +
+                ylab("distribution") +
+                theme_update(plot.title = element_text(hjust = 0.5))
+```
+
+
+
+
